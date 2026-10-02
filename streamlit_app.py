@@ -6,18 +6,16 @@ from snowflake.snowpark.functions import col
 st.title(":cup_with_straw: Customize Your Smoothie! :cup_with_straw:")
 st.write("""Choose the fruits you want in your custom Smoothie!""")
 
-# Entrada para el nombre del cliente
 name_on_order = st.text_input('Name on Smoothie:')
 st.write('The name on your Smoothie will be:', name_on_order)
 
-# Conexión a Snowflake
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-# Extraemos los datos y los convertimos a Pandas para el multiselect
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME')).to_pandas()
+# Obtenemos los datos con .table()
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
 
-# Selector de ingredientes limitado a un máximo de 5 frutas
+# Selector de ingredientes
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
     my_dataframe,
@@ -30,7 +28,6 @@ if ingredients_list:
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
 
-    # Sentencia SQL de inserción
     my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
             values ('""" + ingredients_string + """', '""" + name_on_order + """')"""
 
