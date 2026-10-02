@@ -13,7 +13,9 @@ st.write('The name on your Smoothie will be:', name_on_order)
 # Conexión a Snowflake
 cnx = st.connection("snowflake")
 session = cnx.session()
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+
+# Extraemos los datos y los convertimos a Pandas para el multiselect
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME')).to_pandas()
 
 # Selector de ingredientes limitado a un máximo de 5 frutas
 ingredients_list = st.multiselect(
