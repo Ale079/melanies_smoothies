@@ -1,4 +1,5 @@
 # Import python packages
+import pandas as pd
 import requests
 import streamlit as st
 from snowflake.snowpark.functions import col
@@ -14,13 +15,16 @@ st.write('The name on your Smoothie will be:', name_on_order)
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-# Consultamos ambas columnas: FRUIT_NAME y SEARCH_ON
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON')).to_pandas()
+# Traemos la tabla de frutas incluyendo la nueva columna SEARCH_ON
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
 
-# Selector de ingredientes (muestra FRUIT_NAME al usuario)
+# Convertimos el Snowpark DataFrame a Pandas DataFrame para usar la función .loc
+pd_df = my_dataframe.to_pandas()
+
+# Selector de ingredientes (usa las opciones directamente del Snowpark DataFrame)
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
-    my_dataframe['FRUIT_NAME'],
+    my_dataframe,
     max_selections=5
 )
 
@@ -30,12 +34,12 @@ if ingredients_list:
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
         
-        # Obtenemos el valor de la columna SEARCH_ON correspondiente a la fruta seleccionada
-        search_on = my_dataframe.loc[my_dataframe['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        # Obtenemos el valor de la columna SEARCH_ON usando .loc e .iloc[0]
+        search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
         
         st.subheader(fruit_chosen + ' Nutrition Information')
-        # Usamos search_on para la llamada a la API en lugar de fruit_chosen
-        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + search_on)
+        smoothiefroot_response = requests.get("https://my.smoothiefroot.com/api/fruit/" + fruit_chosen)
         sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
 
     # Sentencia SQL de inserción
