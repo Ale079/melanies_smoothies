@@ -11,6 +11,7 @@ st.write('The name on your Smoothie will be:', name_on_order)
 
 # Conexión
 cnx = st.connection("snowflake")
+session = cnx.session()
 
 # Traemos la tabla de frutas y la convertimos a Pandas
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME')).to_pandas()
