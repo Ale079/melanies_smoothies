@@ -9,13 +9,14 @@ st.write("""Choose the fruits you want in your custom Smoothie!""")
 name_on_order = st.text_input('Name on Smoothie:')
 st.write('The name on your Smoothie will be:', name_on_order)
 
+# Conexión
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-# Obtenemos los datos con .table()
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
+# Traemos la tabla de frutas y la convertimos a Pandas
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME')).to_pandas()
 
-# Selector de ingredientes
+# Selector de ingredientes limitado a un máximo de 5 frutas
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
     my_dataframe,
@@ -28,6 +29,7 @@ if ingredients_list:
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
 
+    # Sentencia SQL de inserción
     my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
             values ('""" + ingredients_string + """', '""" + name_on_order + """')"""
 
