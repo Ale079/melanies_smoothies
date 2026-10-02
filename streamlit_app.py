@@ -11,16 +11,7 @@ st.write('The name on your Smoothie will be:', name_on_order)
 
 # Conexión
 cnx = st.connection("snowflake")
-session = cnx.session()
 
-st.write(session.sql(
-    "select current_account(), current_role(), current_warehouse(), current_database(), current_schema()"
-).collect())
-
-try:
-    session.sql("select fruit_name from smoothies.public.fruit_options limit 1").collect()
-except Exception as e:
-    st.error(str(e))
 # Traemos la tabla de frutas y la convertimos a Pandas
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME')).to_pandas()
 
