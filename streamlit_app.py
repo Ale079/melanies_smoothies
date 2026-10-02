@@ -4,18 +4,15 @@ from snowflake.snowpark.functions import col
 
 # Write directly to the app
 st.title(":cup_with_straw: Customize Your Smoothie! :cup_with_straw:")
-st.write(
-    """Choose the fruits you want in your custom Smoothie!"""
-)
+st.write("""Choose the fruits you want in your custom Smoothie!""")
 
 # Entrada para el nombre del cliente
 name_on_order = st.text_input('Name on Smoothie:')
 st.write('The name on your Smoothie will be:', name_on_order)
 
-# Conexión a Snowflake desde Streamlit Cloud
+# Conexión a Snowflake
 cnx = st.connection("snowflake")
 session = cnx.session()
-
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
 
 # Selector de ingredientes limitado a un máximo de 5 frutas
