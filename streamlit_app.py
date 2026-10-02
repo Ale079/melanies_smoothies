@@ -12,9 +12,10 @@ st.write(
 name_on_order = st.text_input('Name on Smoothie:')
 st.write('The name on your Smoothie will be:', name_on_order)
 
-# Conexión a la sesión de Snowflake
+# Conexión a Snowflake desde Streamlit Cloud
 cnx = st.connection("snowflake")
-session = get_active_session()
+session = cnx.session()
+
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'))
 
 # Selector de ingredientes limitado a un máximo de 5 frutas
@@ -30,7 +31,7 @@ if ingredients_list:
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
 
-    # Sentencia SQL de inserción con ambas columnas
+    # Sentencia SQL de inserción
     my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
             values ('""" + ingredients_string + """', '""" + name_on_order + """')"""
 
